@@ -1,57 +1,6 @@
 // Crop Recommendation API service - Connected to FastAPI backend
 const API_BASE_URL = 'http://localhost:8000/api';
 
-// Mock data for development
-const mockResponse = {
-  recommendations: [
-    {
-      crop: "Wheat",
-      yield: "3200",
-      score: 92,
-      reason: "Optimal nitrogen levels and suitable temperature range. High confidence based on soil pH and rainfall patterns.",
-      profitability: "High",
-      difficulty: "Easy",
-      season: "Winter",
-      waterRequirement: "Medium",
-      marketPrice: 25000, // per ton
-      investmentRequired: 45000 // per hectare
-    },
-    {
-      crop: "Rice",
-      yield: "2800",
-      score: 87,
-      reason: "Excellent soil moisture retention and pH levels. Good match for your irrigation type and climate conditions.",
-      profitability: "Medium",
-      difficulty: "Medium",
-      season: "Monsoon",
-      waterRequirement: "High",
-      marketPrice: 22000,
-      investmentRequired: 40000
-    },
-    {
-      crop: "Maize",
-      yield: "2600",
-      score: 81,
-      reason: "Adequate temperature range and good potassium levels. Suitable for your budget and preferred growing conditions.",
-      profitability: "Medium",
-      difficulty: "Easy",
-      season: "Summer",
-      waterRequirement: "Medium",
-      marketPrice: 18000,
-      investmentRequired: 35000
-    }
-  ],
-  analysis: {
-    soilHealth: "Good",
-    weatherSuitability: "Excellent",
-    riskLevel: "Low",
-    recommendations: "Consider crop rotation for long-term soil health"
-  }
-};
-
-// Simulate API delay
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
 // Transform frontend form data to backend API format
 const transformFormDataToAPIFormat = (formData) => {
   return {
@@ -174,7 +123,8 @@ export const getCropRecommendations = async (formData) => {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
     }
 
     const backendData = await response.json();
@@ -188,10 +138,7 @@ export const getCropRecommendations = async (formData) => {
 
   } catch (error) {
     console.error('Error getting crop recommendations:', error);
-    
-    // Fallback to mock data if API call fails
-    console.log('Falling back to mock data due to API error');
-    return mockResponse;
+    throw error; // Re-throw to let the UI handle the error
   }
 };
 

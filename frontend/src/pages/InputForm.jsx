@@ -2,21 +2,20 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
-  MapPin, 
   Droplets, 
   Thermometer, 
   Cloud, 
-  DollarSign, 
-  Wheat,
   Send,
-  Loader2
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
+import { getCropRecommendations } from '../services/api';
 
 const InputForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
-    location: '',
     soilData: {
       ph: '',
       nitrogen: '',
@@ -28,10 +27,6 @@ const InputForm = () => {
       temperature: '',
       rainfall: '',
       humidity: ''
-    },
-    preferences: {
-      budget: '',
-      preferredCrops: []
     }
   });
 
@@ -43,10 +38,6 @@ const InputForm = () => {
     { value: 'none', label: 'Rain-fed' }
   ];
 
-  const cropOptions = [
-    'Wheat', 'Rice', 'Maize', 'Barley', 'Soybean', 'Cotton', 
-    'Sugarcane', 'Potato', 'Tomato', 'Onion', 'Carrot', 'Cabbage'
-  ];
 
   const handleInputChange = (section, field, value) => {
     if (section) {
@@ -65,29 +56,27 @@ const InputForm = () => {
     }
   };
 
-  const handleCropSelection = (crop) => {
-    setFormData(prev => ({
-      ...prev,
-      preferences: {
-        ...prev.preferences,
-        preferredCrops: prev.preferences.preferredCrops.includes(crop)
-          ? prev.preferences.preferredCrops.filter(c => c !== crop)
-          : [...prev.preferences.preferredCrops, crop]
-      }
-    }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     
-    // Simulate API call
-    setTimeout(() => {
-      // Store form data in sessionStorage for the results page
+    try {
+      // Call the real API
+      const recommendations = await getCropRecommendations(formData);
+      
+      // Store form data and recommendations in sessionStorage for the results page
       sessionStorage.setItem('cropFormData', JSON.stringify(formData));
+      sessionStorage.setItem('cropRecommendations', JSON.stringify(recommendations));
+      
       setLoading(false);
       navigate('/results');
-    }, 2000);
+    } catch (error) {
+      console.error('Error getting recommendations:', error);
+      setError(error.message || 'Failed to get crop recommendations. Please try again.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -103,7 +92,7 @@ const InputForm = () => {
             Get Your Crop Recommendations
           </h1>
           <p className="text-xl text-gray-600">
-            Provide your farm details to receive personalized crop suggestions
+            Provide your soil and weather data to receive AI-powered crop suggestions
           </p>
         </motion.div>
 
@@ -114,26 +103,6 @@ const InputForm = () => {
           onSubmit={handleSubmit}
           className="bg-white rounded-xl shadow-lg p-8 space-y-8"
         >
-          {/* Location Section */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 mb-4">
-              <MapPin className="h-6 w-6 text-green-600" />
-              <h2 className="text-2xl font-semibold text-gray-900">Location</h2>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Farm Location
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.location}
-                onChange={(e) => handleInputChange(null, 'location', e.target.value)}
-                placeholder="e.g., Punjab, India or California, USA"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-              />
-            </div>
-          </div>
 
           {/* Soil Data Section */}
           <div className="space-y-4">
@@ -286,57 +255,17 @@ const InputForm = () => {
             </div>
           </div>
 
-          {/* Preferences Section */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 mb-4">
-              <DollarSign className="h-6 w-6 text-green-600" />
-              <h2 className="text-2xl font-semibold text-gray-900">Your Preferences</h2>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Budget Range (per hectare)
-              </label>
-              <select
-                value={formData.preferences.budget}
-                onChange={(e) => handleInputChange('preferences', 'budget', e.target.value)}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-              >
-                <option value="">Select budget range</option>
-                <option value="low">Low ($500 - $1,500)</option>
-                <option value="medium">Medium ($1,500 - $3,000)</option>
-                <option value="high">High ($3,000+)</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-4">
-                Preferred Crops (Select multiple)
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {cropOptions.map(crop => (
-                  <label
-                    key={crop}
-                    className={`flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-colors ${
-                      formData.preferences.preferredCrops.includes(crop)
-                        ? 'bg-green-50 border-green-500 text-green-700'
-                        : 'border-gray-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.preferences.preferredCrops.includes(crop)}
-                      onChange={() => handleCropSelection(crop)}
-                      className="text-green-600 focus:ring-green-500"
-                    />
-                    <Wheat className="h-4 w-4" />
-                    <span className="text-sm">{crop}</span>
-                  </label>
-                ))}
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
+              <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <h3 className="text-sm font-medium text-red-800">Error</h3>
+                <p className="text-sm text-red-700 mt-1">{error}</p>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Submit Button */}
           <div className="pt-6">

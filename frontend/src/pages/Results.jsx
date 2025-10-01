@@ -24,67 +24,17 @@ const Results = () => {
   const [feedbackSubmitted, setFeedbackSubmitted] = useState({});
   const [showFeedback, setShowFeedback] = useState({});
 
-  // Mock API function to generate recommendations
-  const generateMockRecommendations = (data) => {
-    const mockRecommendations = [
-      {
-        crop: "Wheat",
-        yield: "3200",
-        score: 92,
-        reason: "Optimal nitrogen levels and suitable temperature range. High confidence based on soil pH and rainfall patterns.",
-        profitability: "High",
-        difficulty: "Easy",
-        season: "Winter",
-        waterRequirement: "Medium"
-      },
-      {
-        crop: "Rice",
-        yield: "2800",
-        score: 87,
-        reason: "Excellent soil moisture retention and pH levels. Good match for your irrigation type and climate conditions.",
-        profitability: "Medium",
-        difficulty: "Medium",
-        season: "Monsoon",
-        waterRequirement: "High"
-      },
-      {
-        crop: "Maize",
-        yield: "2600",
-        score: 81,
-        reason: "Adequate temperature range and good potassium levels. Suitable for your budget and preferred growing conditions.",
-        profitability: "Medium",
-        difficulty: "Easy",
-        season: "Summer",
-        waterRequirement: "Medium"
-      }
-    ];
-
-    // If user selected preferred crops, prioritize them
-    if (data?.preferences?.preferredCrops?.length > 0) {
-      const preferredRecommendations = mockRecommendations.filter(rec => 
-        data.preferences.preferredCrops.includes(rec.crop)
-      );
-      const otherRecommendations = mockRecommendations.filter(rec => 
-        !data.preferences.preferredCrops.includes(rec.crop)
-      );
-      return [...preferredRecommendations, ...otherRecommendations].slice(0, 3);
-    }
-
-    return mockRecommendations;
-  };
 
   useEffect(() => {
-    // Get form data from sessionStorage
+    // Get form data and recommendations from sessionStorage
     const storedData = sessionStorage.getItem('cropFormData');
-    if (storedData) {
+    const storedRecommendations = sessionStorage.getItem('cropRecommendations');
+    
+    if (storedData && storedRecommendations) {
       const data = JSON.parse(storedData);
+      const recs = JSON.parse(storedRecommendations);
       setFormData(data);
-      
-      // Simulate API call delay
-      setTimeout(() => {
-        const mockRecs = generateMockRecommendations(data);
-        setRecommendations(mockRecs);
-      }, 1000);
+      setRecommendations(recs.recommendations || []);
     } else {
       // Redirect to input form if no data found
       navigate('/input');
@@ -167,7 +117,7 @@ const Results = () => {
             Your Crop Recommendations
           </h1>
           <p className="text-xl text-gray-600 mb-6">
-            Based on your farm conditions in <span className="font-semibold text-green-600">{formData.location}</span>
+            Based on your soil and weather conditions
           </p>
           
           {/* Action Buttons */}
@@ -194,7 +144,7 @@ const Results = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12"
         >
           <div className="bg-white rounded-xl p-6 shadow-lg">
             <div className="flex items-center space-x-3 mb-2">
@@ -215,17 +165,6 @@ const Results = () => {
             <p className="text-gray-600 text-sm">
               {formData.weather.temperature}°C | {formData.weather.rainfall}mm rainfall | 
               {formData.weather.humidity}% humidity
-            </p>
-          </div>
-          
-          <div className="bg-white rounded-xl p-6 shadow-lg">
-            <div className="flex items-center space-x-3 mb-2">
-              <Target className="h-6 w-6 text-purple-600" />
-              <h3 className="font-semibold text-gray-900">Your Preferences</h3>
-            </div>
-            <p className="text-gray-600 text-sm">
-              Budget: {formData.preferences.budget} | 
-              Irrigation: {formData.soilData.irrigationType}
             </p>
           </div>
         </motion.div>
