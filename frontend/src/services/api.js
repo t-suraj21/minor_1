@@ -40,18 +40,18 @@ const transformBackendResponse = (backendData, originalFormData) => {
   };
 };
 
-// Helper functions to add additional crop info
+// Helper functions to add additional crop info based on agricultural data
 const getSeason = (crop) => {
   const seasonMap = {
-    'rice': 'Monsoon',
-    'wheat': 'Winter', 
-    'maize': 'Summer',
-    'cotton': 'Summer',
-    'sugarcane': 'Year-round',
-    'banana': 'Year-round',
-    'mango': 'Summer',
-    'apple': 'Winter',
-    'grapes': 'Winter'
+    'rice': 'Monsoon (Kharif)',
+    'maize': 'Summer/Monsoon',
+    'chickpea': 'Winter (Rabi)',
+    'kidneybeans': 'Summer',
+    'pigeonpeas': 'Monsoon (Kharif)',
+    'mothbeans': 'Summer',
+    'mungbean': 'Summer/Monsoon',
+    'blackgram': 'Monsoon (Kharif)',
+    'lentil': 'Winter (Rabi)'
   };
   return seasonMap[crop.toLowerCase()] || 'Seasonal';
 };
@@ -59,46 +59,48 @@ const getSeason = (crop) => {
 const getWaterRequirement = (crop) => {
   const waterMap = {
     'rice': 'High',
-    'sugarcane': 'High',
-    'banana': 'High',
-    'wheat': 'Medium',
     'maize': 'Medium',
-    'cotton': 'Medium',
-    'mango': 'Medium',
-    'apple': 'Low',
-    'grapes': 'Low'
+    'chickpea': 'Low',
+    'kidneybeans': 'Medium',
+    'pigeonpeas': 'Medium',
+    'mothbeans': 'Low',
+    'mungbean': 'Medium',
+    'blackgram': 'Medium',
+    'lentil': 'Low'
   };
   return waterMap[crop.toLowerCase()] || 'Medium';
 };
 
 const getMarketPrice = (crop) => {
+  // Average prices per quintal in INR (₹)
   const priceMap = {
-    'rice': 22000,
-    'wheat': 25000,
-    'maize': 18000,
-    'cotton': 35000,
-    'sugarcane': 3000,
-    'banana': 15000,
-    'mango': 40000,
-    'apple': 45000,
-    'grapes': 30000
+    'rice': 2200,
+    'maize': 1800,
+    'chickpea': 5000,
+    'kidneybeans': 6000,
+    'pigeonpeas': 5500,
+    'mothbeans': 4000,
+    'mungbean': 6500,
+    'blackgram': 5800,
+    'lentil': 5200
   };
-  return priceMap[crop.toLowerCase()] || 20000;
+  return priceMap[crop.toLowerCase()] || 3000;
 };
 
 const getInvestmentRequired = (crop) => {
+  // Investment per hectare in INR (₹)
   const investmentMap = {
     'rice': 40000,
-    'wheat': 35000,
     'maize': 30000,
-    'cotton': 50000,
-    'sugarcane': 80000,
-    'banana': 60000,
-    'mango': 100000,
-    'apple': 120000,
-    'grapes': 90000
+    'chickpea': 25000,
+    'kidneybeans': 35000,
+    'pigeonpeas': 28000,
+    'mothbeans': 22000,
+    'mungbean': 30000,
+    'blackgram': 28000,
+    'lentil': 25000
   };
-  return investmentMap[crop.toLowerCase()] || 40000;
+  return investmentMap[crop.toLowerCase()] || 30000;
 };
 
 // Main prediction function
