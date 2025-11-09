@@ -13,9 +13,21 @@ import {
   ThumbsUp,
   ThumbsDown,
   Star,
-  MessageSquare
+  MessageSquare,
+  Droplets,
+  Thermometer,
+  Leaf,
+  CloudRain,
+  DollarSign,
+  Calendar,
+  CheckCircle2
 } from 'lucide-react';
 import { submitFeedback } from '../services/api';
+import StatsCard from '../components/StatsCard';
+import Badge from '../components/Badge';
+import ProgressBar from '../components/ProgressBar';
+import LoadingSpinner from '../components/LoadingSpinner';
+import Alert from '../components/Alert';
 
 const Results = () => {
   const navigate = useNavigate();
@@ -93,18 +105,11 @@ const Results = () => {
   };
 
   if (!formData) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your recommendations...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-purple-50 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -113,71 +118,139 @@ const Results = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Your Crop Recommendations
+          <Badge variant="success" size="lg">
+            <CheckCircle2 className="h-4 w-4" />
+            Analysis Complete
+          </Badge>
+          <h1 className="text-5xl font-black text-gray-900 mb-4 mt-6">
+            Your <span className="text-green-600">Crop Recommendations</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-6">
-            Based on your soil and weather conditions
+          <p className="text-xl text-gray-600 mb-8">
+            AI-powered suggestions based on your farm's unique conditions
           </p>
           
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/input"
-              className="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              Back to Form
+            <Link to="/input">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="inline-flex items-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all shadow-md hover:shadow-lg"
+              >
+                <ArrowLeft className="mr-2 h-5 w-5" />
+                Back to Form
+              </motion.button>
             </Link>
-            <button
+            <motion.button
               onClick={() => window.location.reload()}
-              className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl"
             >
               <RotateCcw className="mr-2 h-5 w-5" />
-              Generate New Analysis
-            </button>
+              New Analysis
+            </motion.button>
           </div>
         </motion.div>
 
-        {/* Summary Cards */}
+        {/* Stats Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
         >
-          <div className="bg-white rounded-xl p-6 shadow-lg">
-            <div className="flex items-center space-x-3 mb-2">
-              <BarChart3 className="h-6 w-6 text-blue-600" />
-              <h3 className="font-semibold text-gray-900">Soil Analysis</h3>
+          <StatsCard
+            title="pH Level"
+            value={formData.ph}
+            subtitle="Soil acidity"
+            icon={<Droplets className="h-6 w-6" />}
+            color="blue"
+          />
+          <StatsCard
+            title="Temperature"
+            value={`${formData.temperature}°C`}
+            subtitle="Average temp"
+            icon={<Thermometer className="h-6 w-6" />}
+            color="orange"
+          />
+          <StatsCard
+            title="Rainfall"
+            value={`${formData.rainfall}mm`}
+            subtitle="Rainfall"
+            icon={<CloudRain className="h-6 w-6" />}
+            color="blue"
+          />
+          <StatsCard
+            title="Humidity"
+            value={`${formData.humidity}%`}
+            subtitle="Moisture level"
+            icon={<Droplets className="h-6 w-6" />}
+            color="purple"
+          />
+        </motion.div>
+
+        {/* NPK Summary */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="bg-white rounded-2xl shadow-xl p-8 border-2 border-gray-100 mb-12"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+              <Leaf className="h-6 w-6 text-white" />
             </div>
-            <p className="text-gray-600 text-sm">
-              pH: {formData.soilData.ph} | N: {formData.soilData.nitrogen}kg/ha | 
-              P: {formData.soilData.phosphorus}kg/ha | K: {formData.soilData.potassium}kg/ha
-            </p>
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900">Soil Nutrients (NPK)</h3>
+              <p className="text-sm text-gray-600">Your soil's nutrient composition</p>
+            </div>
           </div>
-          
-          <div className="bg-white rounded-xl p-6 shadow-lg">
-            <div className="flex items-center space-x-3 mb-2">
-              <TrendingUp className="h-6 w-6 text-green-600" />
-              <h3 className="font-semibold text-gray-900">Weather Conditions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <ProgressBar 
+                label="Nitrogen (N)" 
+                value={formData.N} 
+                max={200} 
+                color="green"
+              />
             </div>
-            <p className="text-gray-600 text-sm">
-              {formData.weather.temperature}°C | {formData.weather.rainfall}mm rainfall | 
-              {formData.weather.humidity}% humidity
-            </p>
+            <div>
+              <ProgressBar 
+                label="Phosphorus (P)" 
+                value={formData.P} 
+                max={100} 
+                color="blue"
+              />
+            </div>
+            <div>
+              <ProgressBar 
+                label="Potassium (K)" 
+                value={formData.K} 
+                max={150} 
+                color="orange"
+              />
+            </div>
           </div>
         </motion.div>
 
         {/* Loading State */}
         {recommendations.length === 0 && (
+          <LoadingSpinner fullScreen />
+        )}
+
+        {/* Recommendations Title */}
+        {recommendations.length > 0 && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="text-center mb-8"
           >
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Analyzing your data and generating recommendations...</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              Top Crop Recommendations
+            </h2>
+            <p className="text-gray-600">Ranked by suitability for your farm</p>
           </motion.div>
         )}
 
@@ -186,7 +259,7 @@ const Results = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
             {recommendations.map((rec, index) => (
@@ -195,150 +268,199 @@ const Results = () => {
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.6 + index * 0.2 }}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-gray-100 hover:border-green-300 transition-all"
               >
                 {/* Card Header */}
-                <div className="bg-gradient-to-r from-green-500 to-blue-500 p-6 text-white">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-3">
-                      <Wheat className="h-8 w-8" />
-                      <h3 className="text-2xl font-bold">{rec.crop}</h3>
+                <div className={`bg-gradient-to-r p-6 text-white relative overflow-hidden ${
+                  index === 0 ? 'from-green-500 to-green-600' :
+                  index === 1 ? 'from-blue-500 to-blue-600' :
+                  'from-purple-500 to-purple-600'
+                }`}>
+                  {/* Pattern Overlay */}
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute transform rotate-12 -right-8 -top-8">
+                      <Wheat className="h-32 w-32" />
                     </div>
-                    {index === 0 && (
-                      <Award className="h-6 w-6 text-yellow-300" />
-                    )}
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="text-center">
-                      <p className="text-3xl font-bold">{rec.yield}</p>
-                      <p className="text-sm opacity-90">kg/hectare</p>
+                  
+                  <div className="relative">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                          <Wheat className="h-7 w-7" />
+                        </div>
+                        <h3 className="text-2xl font-black">{rec.crop}</h3>
+                      </div>
+                      {index === 0 && (
+                        <div className="flex items-center gap-1 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-bold">
+                          <Award className="h-4 w-4" />
+                          Best
+                        </div>
+                      )}
+                      {index === 1 && (
+                        <Badge variant="default" size="sm">2nd</Badge>
+                      )}
+                      {index === 2 && (
+                        <Badge variant="default" size="sm">3rd</Badge>
+                      )}
                     </div>
-                    <div className="text-center">
-                      <p className="text-3xl font-bold">{rec.score}%</p>
-                      <p className="text-sm opacity-90">confidence</p>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm opacity-90 mb-1">Expected Yield</p>
+                        <p className="text-3xl font-bold">{rec.yield}</p>
+                        <p className="text-xs opacity-80">kg/hectare</p>
+                      </div>
+                      <div>
+                        <p className="text-sm opacity-90 mb-1">Confidence</p>
+                        <p className="text-3xl font-bold">{rec.score}%</p>
+                        <div className="mt-1">
+                          <ProgressBar value={rec.score} max={100} color="white" showValue={false} />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Card Body */}
                 <div className="p-6 space-y-4">
-                  {/* Confidence Score */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Confidence Score</span>
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getScoreColor(rec.score)}`}>
-                      {rec.score}%
-                    </span>
-                  </div>
-
-                  {/* Expected Yield */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Expected Yield</span>
-                    <span className="text-sm font-bold text-gray-900">{rec.yield} kg/ha</span>
-                  </div>
-
-                  {/* Profitability */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Profitability</span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getProfitabilityColor(rec.profitability)}`}>
-                      {rec.profitability}
-                    </span>
-                  </div>
-
-                  {/* Growing Season */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Best Season</span>
-                    <span className="text-sm text-gray-900">{rec.season}</span>
+                  {/* Key Metrics Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-green-50 p-4 rounded-xl border border-green-100">
+                      <div className="flex items-center gap-2 mb-2">
+                        <DollarSign className="h-4 w-4 text-green-600" />
+                        <span className="text-xs font-medium text-gray-600">Profitability</span>
+                      </div>
+                      <Badge variant={
+                        rec.profitability === 'High' ? 'success' :
+                        rec.profitability === 'Medium' ? 'warning' : 'error'
+                      }>
+                        {rec.profitability}
+                      </Badge>
+                    </div>
+                    
+                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Calendar className="h-4 w-4 text-blue-600" />
+                        <span className="text-xs font-medium text-gray-600">Best Season</span>
+                      </div>
+                      <p className="text-sm font-bold text-gray-900">{rec.season}</p>
+                    </div>
                   </div>
 
                   {/* Water Requirement */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Water Need</span>
-                    <span className="text-sm text-gray-900">{rec.waterRequirement}</span>
+                  <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-xl border border-blue-100">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Droplets className="h-5 w-5 text-blue-600" />
+                        <span className="text-sm font-semibold text-gray-700">Water Need</span>
+                      </div>
+                      <Badge variant="info">{rec.waterRequirement}</Badge>
+                    </div>
                   </div>
 
                   {/* Explanation */}
-                  <div className="pt-4 border-t border-gray-100">
-                    <div className="flex items-start space-x-2">
-                      <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Info className="h-4 w-4 text-blue-600" />
+                      </div>
                       <div>
-                        <h4 className="text-sm font-medium text-gray-900 mb-1">Why this crop?</h4>
-                        <p className="text-sm text-gray-600 leading-relaxed">{rec.reason}</p>
+                        <h4 className="text-sm font-bold text-gray-900 mb-1">Why this crop?</h4>
+                        <p className="text-sm text-gray-700 leading-relaxed">{rec.reason}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Feedback Section */}
-                  <div className="pt-4 border-t border-gray-100">
+                  <div className="pt-4 border-t border-gray-200">
                     {!feedbackSubmitted[rec.crop] ? (
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-gray-700">Was this helpful?</span>
-                          <button
+                          <span className="text-sm font-semibold text-gray-700">Was this helpful?</span>
+                          <motion.button
                             onClick={() => toggleFeedback(rec.crop)}
-                            className="text-blue-600 hover:text-blue-700 text-sm"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
                           >
-                            <MessageSquare className="h-4 w-4 inline mr-1" />
-                            Feedback
-                          </button>
+                            <MessageSquare className="h-4 w-4" />
+                            Give Feedback
+                          </motion.button>
                         </div>
                         
                         {showFeedback[rec.crop] && (
-                          <div className="bg-gray-50 rounded-lg p-3 space-y-3">
-                            <div className="flex space-x-2">
-                              <button
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 space-y-3"
+                          >
+                            <div className="flex gap-2">
+                              <motion.button
                                 onClick={() => handleFeedback(rec.crop, true, 5)}
-                                className="flex items-center space-x-1 px-3 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors text-sm"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all text-sm font-semibold shadow-md"
                               >
                                 <ThumbsUp className="h-4 w-4" />
-                                <span>Accept</span>
-                              </button>
-                              <button
+                                Accept
+                              </motion.button>
+                              <motion.button
                                 onClick={() => handleFeedback(rec.crop, false, 2)}
-                                className="flex items-center space-x-1 px-3 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors text-sm"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all text-sm font-semibold shadow-md"
                               >
                                 <ThumbsDown className="h-4 w-4" />
-                                <span>Decline</span>
-                              </button>
+                                Decline
+                              </motion.button>
                             </div>
                             
-                            <div className="flex items-center space-x-1">
-                              <span className="text-xs text-gray-600">Rate:</span>
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                  key={star}
-                                  onClick={() => handleFeedback(rec.crop, true, star)}
-                                  className="text-yellow-400 hover:text-yellow-500"
-                                >
-                                  <Star className="h-4 w-4" />
-                                </button>
-                              ))}
+                            <div className="flex items-center justify-center gap-2 pt-2 border-t border-gray-300">
+                              <span className="text-xs font-medium text-gray-600">Rate:</span>
+                              <div className="flex gap-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <motion.button
+                                    key={star}
+                                    onClick={() => handleFeedback(rec.crop, true, star)}
+                                    whileHover={{ scale: 1.2 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    className="text-yellow-400 hover:text-yellow-500 transition-colors"
+                                  >
+                                    <Star className="h-5 w-5 fill-current" />
+                                  </motion.button>
+                                ))}
+                              </div>
                             </div>
-                          </div>
+                          </motion.div>
                         )}
                       </div>
                     ) : (
-                      <div className="text-center py-2">
-                        <span className="text-sm text-gray-600">
-                          {feedbackSubmitted[rec.crop].accepted ? '✅ Accepted' : '❌ Declined'} 
-                          {feedbackSubmitted[rec.crop].rating && (
-                            <span className="ml-2">
-                              {'⭐'.repeat(feedbackSubmitted[rec.crop].rating)}
-                            </span>
+                      <div className="text-center py-3 bg-gray-50 rounded-xl">
+                        <Badge variant={feedbackSubmitted[rec.crop].accepted ? 'success' : 'error'}>
+                          {feedbackSubmitted[rec.crop].accepted ? (
+                            <>
+                              <CheckCircle2 className="h-4 w-4" />
+                              Accepted
+                            </>
+                          ) : (
+                            <>
+                              ✕ Declined
+                            </>
                           )}
-                        </span>
+                        </Badge>
+                        {feedbackSubmitted[rec.crop].rating && (
+                          <div className="mt-2 flex justify-center gap-1">
+                            {Array.from({ length: feedbackSubmitted[rec.crop].rating }).map((_, i) => (
+                              <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-
-                  {/* Ranking Badge */}
-                  {index === 0 && (
-                    <div className="flex items-center justify-center pt-2">
-                      <span className="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full flex items-center space-x-1">
-                        <Award className="h-3 w-3" />
-                        <span>Top Recommendation</span>
-                      </span>
-                    </div>
-                  )}
                 </div>
               </motion.div>
             ))}
@@ -351,28 +473,13 @@ const Results = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.2 }}
-            className="mt-12 bg-blue-50 rounded-xl p-8"
+            className="mt-12"
           >
-            <div className="text-center">
-              <Info className="h-8 w-8 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Important Notes
-              </h3>
-              <div className="text-gray-700 space-y-2 max-w-4xl mx-auto">
-                <p>
-                  • These recommendations are based on the data you provided and our AI analysis.
-                </p>
-                <p>
-                  • Consider consulting with local agricultural experts for region-specific advice.
-                </p>
-                <p>
-                  • Market prices and demand should also be factored into your final decision.
-                </p>
-                <p>
-                  • Monitor weather forecasts and soil conditions regularly for optimal results.
-                </p>
-              </div>
-            </div>
+            <Alert 
+              type="info"
+              title="Important Considerations"
+              message="These AI recommendations are based on your provided data. Always consult with local agricultural experts, consider market conditions, and monitor weather patterns for optimal results."
+            />
           </motion.div>
         )}
       </div>

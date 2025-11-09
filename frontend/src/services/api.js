@@ -2,15 +2,16 @@
 const API_BASE_URL = 'http://localhost:8000/api';
 
 // Transform frontend form data to backend API format
+// Now the form data directly matches the CSV format!
 const transformFormDataToAPIFormat = (formData) => {
   return {
-    N: parseFloat(formData.soilData.nitrogen),
-    P: parseFloat(formData.soilData.phosphorus),
-    K: parseFloat(formData.soilData.potassium),
-    temperature: parseFloat(formData.weather.temperature),
-    humidity: parseFloat(formData.weather.humidity),
-    ph: parseFloat(formData.soilData.ph),
-    rainfall: parseFloat(formData.weather.rainfall)
+    N: parseFloat(formData.N),
+    P: parseFloat(formData.P),
+    K: parseFloat(formData.K),
+    temperature: parseFloat(formData.temperature),
+    humidity: parseFloat(formData.humidity),
+    ph: parseFloat(formData.ph),
+    rainfall: parseFloat(formData.rainfall)
   };
 };
 
@@ -126,6 +127,16 @@ export const getCropRecommendations = async (formData) => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.error('API Error Response:', errorData);
+      
+      // Handle validation errors (422)
+      if (response.status === 422 && errorData.detail) {
+        const validationErrors = Array.isArray(errorData.detail) 
+          ? errorData.detail.map(err => `${err.loc[1]}: ${err.msg}`).join(', ')
+          : errorData.detail;
+        throw new Error(`Validation Error: ${validationErrors}`);
+      }
+      
       throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
     }
 
@@ -289,6 +300,43 @@ export const checkAPIHealth = async () => {
   }
 };
 
+// Chatbot API
+export const sendChatMessage = async (message) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/chatbot`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error sending chat message:', error);
+    throw error;
+  }
+};
+
+export const getChatbotTopics = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/chatbot/topics`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching chatbot topics:', error);
+    return null;
+  }
+};
+
 export default {
   getCropRecommendations,
   submitFeedback,
@@ -297,5 +345,7 @@ export default {
   checkAPIHealth,
   getWeatherData,
   getSoilData,
-  getMarketPrices
+  getMarketPrices,
+  sendChatMessage,
+  getChatbotTopics
 };

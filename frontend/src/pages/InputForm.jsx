@@ -6,54 +6,37 @@ import {
   Thermometer, 
   Cloud, 
   Send,
-  Loader2,
-  AlertCircle
+  Leaf,
+  Beaker,
+  Wind,
+  AlertCircle,
+  Lightbulb
 } from 'lucide-react';
 import { getCropRecommendations } from '../services/api';
+import ModernInput from '../components/ModernInput';
+import Alert from '../components/Alert';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const InputForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
-    soilData: {
-      ph: '',
-      nitrogen: '',
-      phosphorus: '',
-      potassium: '',
-      irrigationType: 'drip'
-    },
-    weather: {
-      temperature: '',
-      rainfall: '',
-      humidity: ''
-    }
+    N: '',
+    P: '',
+    K: '',
+    temperature: '',
+    humidity: '',
+    ph: '',
+    rainfall: ''
   });
 
-  const irrigationTypes = [
-    { value: 'drip', label: 'Drip Irrigation' },
-    { value: 'sprinkler', label: 'Sprinkler System' },
-    { value: 'flood', label: 'Flood Irrigation' },
-    { value: 'furrow', label: 'Furrow Irrigation' },
-    { value: 'none', label: 'Rain-fed' }
-  ];
 
-
-  const handleInputChange = (section, field, value) => {
-    if (section) {
-      setFormData(prev => ({
-        ...prev,
-        [section]: {
-          ...prev[section],
-          [field]: value
-        }
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [field]: value
-      }));
-    }
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
 
@@ -79,20 +62,29 @@ const InputForm = () => {
     }
   };
 
+  if (loading) {
+    return <LoadingSpinner fullScreen />;
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-12">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Get Your Crop Recommendations
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-full mb-6">
+            <Leaf className="h-4 w-4" />
+            <span className="text-sm font-semibold">AI-Powered Analysis</span>
+          </div>
+          <h1 className="text-5xl font-black text-gray-900 mb-4">
+            Get Your Crop <span className="text-green-600">Recommendations</span>
           </h1>
-          <p className="text-xl text-gray-600">
-            Provide your soil and weather data to receive AI-powered crop suggestions
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Provide your soil and weather data to receive AI-powered crop suggestions tailored to your farm
           </p>
         </motion.div>
 
@@ -101,191 +93,177 @@ const InputForm = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           onSubmit={handleSubmit}
-          className="bg-white rounded-xl shadow-lg p-8 space-y-8"
+          className="space-y-8"
         >
+          {/* Info Alert */}
+          <Alert 
+            type="info" 
+            title="Quick Tip" 
+            message="For best results, use recent soil test data and current weather averages for your location."
+          />
 
           {/* Soil Data Section */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 mb-4">
-              <Droplets className="h-6 w-6 text-green-600" />
-              <h2 className="text-2xl font-semibold text-gray-900">Soil Data</h2>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  pH Level
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="14"
-                  required
-                  value={formData.soilData.ph}
-                  onChange={(e) => handleInputChange('soilData', 'ph', e.target.value)}
-                  placeholder="6.5"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-                />
+          <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-gray-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg">
+                <Beaker className="h-7 w-7 text-white" />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nitrogen (N) - kg/ha
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  required
-                  value={formData.soilData.nitrogen}
-                  onChange={(e) => handleInputChange('soilData', 'nitrogen', e.target.value)}
-                  placeholder="120"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phosphorus (P) - kg/ha
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  required
-                  value={formData.soilData.phosphorus}
-                  onChange={(e) => handleInputChange('soilData', 'phosphorus', e.target.value)}
-                  placeholder="40"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Potassium (K) - kg/ha
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  required
-                  value={formData.soilData.potassium}
-                  onChange={(e) => handleInputChange('soilData', 'potassium', e.target.value)}
-                  placeholder="60"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-                />
+                <h2 className="text-2xl font-bold text-gray-900">Soil Analysis</h2>
+                <p className="text-sm text-gray-600">Enter your soil nutrient levels and pH</p>
               </div>
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Irrigation Type
-              </label>
-              <select
-                value={formData.soilData.irrigationType}
-                onChange={(e) => handleInputChange('soilData', 'irrigationType', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-              >
-                {irrigationTypes.map(type => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <ModernInput
+                label="Nitrogen (N) - kg/ha"
+                type="number"
+                min="0"
+                max="300"
+                required
+                value={formData.N}
+                onChange={(e) => handleInputChange('N', e.target.value)}
+                placeholder="90"
+                icon={<Leaf className="h-5 w-5" />}
+                helperText="Range: 0-300 kg/ha"
+              />
+              
+              <ModernInput
+                label="Phosphorus (P) - kg/ha"
+                type="number"
+                min="0"
+                max="150"
+                required
+                value={formData.P}
+                onChange={(e) => handleInputChange('P', e.target.value)}
+                placeholder="42"
+                icon={<Leaf className="h-5 w-5" />}
+                helperText="Range: 0-150 kg/ha"
+              />
+              
+              <ModernInput
+                label="Potassium (K) - kg/ha"
+                type="number"
+                min="0"
+                max="100"
+                required
+                value={formData.K}
+                onChange={(e) => handleInputChange('K', e.target.value)}
+                placeholder="43"
+                icon={<Leaf className="h-5 w-5" />}
+                helperText="Range: 0-100 kg/ha"
+              />
+              
+              <ModernInput
+                label="pH Level"
+                type="number"
+                step="0.1"
+                min="3"
+                max="10"
+                required
+                value={formData.ph}
+                onChange={(e) => handleInputChange('ph', e.target.value)}
+                placeholder="6.5"
+                icon={<Droplets className="h-5 w-5" />}
+                helperText="Range: 3.0 - 10.0 (Optimal: 6.0-7.5)"
+              />
             </div>
           </div>
 
           {/* Weather Section */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 mb-4">
-              <Cloud className="h-6 w-6 text-green-600" />
-              <h2 className="text-2xl font-semibold text-gray-900">Weather Conditions</h2>
+          <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-gray-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                <Cloud className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Weather Conditions</h2>
+                <p className="text-sm text-gray-600">Enter average weather data for your location</p>
+              </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Average Temperature (°C)
-                </label>
-                <div className="relative">
-                  <Thermometer className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <input
-                    type="number"
-                    step="0.1"
-                    required
-                    value={formData.weather.temperature}
-                    onChange={(e) => handleInputChange('weather', 'temperature', e.target.value)}
-                    placeholder="25"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-                  />
-                </div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <ModernInput
+                label="Temperature (°C)"
+                type="number"
+                step="0.1"
+                min="-10"
+                max="50"
+                required
+                value={formData.temperature}
+                onChange={(e) => handleInputChange('temperature', e.target.value)}
+                placeholder="20.88"
+                icon={<Thermometer className="h-5 w-5" />}
+                helperText="Range: -10°C to 50°C"
+              />
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Annual Rainfall (mm)
-                </label>
-                <div className="relative">
-                  <Droplets className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    value={formData.weather.rainfall}
-                    onChange={(e) => handleInputChange('weather', 'rainfall', e.target.value)}
-                    placeholder="800"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-                  />
-                </div>
-              </div>
+              <ModernInput
+                label="Humidity (%)"
+                type="number"
+                step="0.1"
+                min="0"
+                max="100"
+                required
+                value={formData.humidity}
+                onChange={(e) => handleInputChange('humidity', e.target.value)}
+                placeholder="82.0"
+                icon={<Wind className="h-5 w-5" />}
+                helperText="Range: 0-100%"
+              />
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Humidity (%)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  required
-                  value={formData.weather.humidity}
-                  onChange={(e) => handleInputChange('weather', 'humidity', e.target.value)}
-                  placeholder="65"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
-                />
-              </div>
+              <ModernInput
+                label="Rainfall (mm)"
+                type="number"
+                step="0.1"
+                min="0"
+                max="500"
+                required
+                value={formData.rainfall}
+                onChange={(e) => handleInputChange('rainfall', e.target.value)}
+                placeholder="202.9"
+                icon={<Droplets className="h-5 w-5" />}
+                helperText="Range: 0-500 mm"
+              />
             </div>
           </div>
 
-
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
-              <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
-              <div>
-                <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <p className="text-sm text-red-700 mt-1">{error}</p>
-              </div>
-            </div>
+            <Alert 
+              type="error" 
+              title="Error"
+              message={error}
+              onClose={() => setError(null)}
+            />
           )}
 
           {/* Submit Button */}
-          <div className="pt-6">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-green-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Analyzing your data...</span>
-                </>
-              ) : (
-                <>
-                  <Send className="h-5 w-5" />
-                  <span>Get Recommendations</span>
-                </>
-              )}
-            </button>
+          <motion.button
+            type="submit"
+            disabled={loading}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-5 px-8 rounded-2xl font-bold text-lg hover:from-green-700 hover:to-green-800 focus:ring-4 focus:ring-green-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl"
+          >
+            <Send className="h-6 w-6" />
+            <span>Get AI Recommendations</span>
+          </motion.button>
+
+          {/* Helper Text */}
+          <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6 border-2 border-blue-100">
+            <div className="flex items-start gap-3">
+              <Lightbulb className="h-6 w-6 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">Pro Tips for Best Results</h4>
+                <ul className="space-y-1 text-sm text-gray-700">
+                  <li>• Use recent soil test results (within the last 6 months)</li>
+                  <li>• Enter annual average weather data, not current conditions</li>
+                  <li>• Ensure all values are within the specified ranges</li>
+                  <li>• pH optimal range is 6.0-7.5 for most crops</li>
+                  <li>• Consult with local agricultural experts for accurate soil data</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </motion.form>
       </div>

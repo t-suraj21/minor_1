@@ -43,24 +43,14 @@ const About = () => {
 
   const team = [
     {
-      name: "Dr. Sarah Johnson",
+      name: "Dr. Mahesh Kumar",
       role: "Agricultural Data Scientist",
       description: "PhD in Agricultural Engineering with 15+ years in precision farming and AI applications."
     },
-    {
-      name: "Mike Chen",
-      role: "Machine Learning Engineer",
-      description: "Expert in developing predictive models for agricultural optimization and crop yield forecasting."
-    },
-    {
-      name: "Dr. Raj Patel",
-      role: "Soil Science Specialist",
-      description: "Leading researcher in soil health analytics and sustainable farming practices."
-    }
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-green-50 to-blue-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
