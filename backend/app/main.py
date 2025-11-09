@@ -6,7 +6,7 @@ import os
 from contextlib import asynccontextmanager
 
 # Import routes
-from .routes import prediction, feedback, farms
+from .routes import prediction, feedback, farms, chatbot
 from .db import startup_db_client, shutdown_db_client
 
 # Configure logging
@@ -92,6 +92,7 @@ app.add_middleware(
 app.include_router(prediction.router)
 app.include_router(feedback.router)
 app.include_router(farms.router)
+app.include_router(chatbot.router)
 
 # Root endpoint
 @app.get("/")
@@ -107,6 +108,7 @@ async def root():
             "feedback": "/api/feedback", 
             "recommendations": "/api/recommendation/{farm_id}",
             "farms": "/api/farms",
+            "chatbot": "/api/chatbot",
             "health": "/health"
         }
     }
