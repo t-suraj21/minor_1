@@ -156,7 +156,7 @@ const SplashScreen = ({ onComplete }) => {
             कृषि AI
           </h1>
           <p className="text-xl md:text-2xl font-bold mb-2" style={{ color: '#FF9933', textShadow: '1px 1px 2px rgba(0,0,0,0.3)' }}>
-            CropAI
+            CRS
           </p>
           <p className="text-lg md:text-xl font-light" style={{ color: '#138808', textShadow: '1px 1px 2px rgba(255,255,255,0.5)' }}>
             Smart Crop Recommendation System
@@ -204,14 +204,14 @@ const SplashScreen = ({ onComplete }) => {
               <span className="text-sm">
                 {loadingProgress < 30 && 'AI मॉडल शुरू हो रहे हैं...'}
                 {loadingProgress >= 30 && loadingProgress < 60 && 'फसल डेटाबेस लोड हो रहा है...'}
-                {loadingProgress >= 60 && loadingProgress < 90 && 'कृषि बॉट तैयार हो रहा है...'}
+                {loadingProgress >= 60 && loadingProgress < 90 && 'CRS Talk तैयार हो रहा है...'}
                 {loadingProgress >= 90 && 'किसानों की मदद के लिए तैयार!'}
               </span>
             </div>
             <div className="text-xs font-medium" style={{ color: '#000080' }}>
               {loadingProgress < 30 && 'Initializing AI Models...'}
               {loadingProgress >= 30 && loadingProgress < 60 && 'Loading Crop Database...'}
-              {loadingProgress >= 60 && loadingProgress < 90 && 'Preparing AgriBot...'}
+                {loadingProgress >= 60 && loadingProgress < 90 && 'Preparing CRS Talk...'}
               {loadingProgress >= 90 && 'Ready to Help Farmers!'}
             </div>
           </div>

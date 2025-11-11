@@ -61,7 +61,7 @@ const About = () => {
             className="text-center"
           >
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              About <span className="text-green-600">CropAI</span>
+              About <span className="text-green-600">CRS</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               We're revolutionizing agriculture with AI-powered crop recommendations, 

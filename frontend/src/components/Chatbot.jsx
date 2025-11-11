@@ -133,7 +133,7 @@ const Chatbot = ({ isOpen, onClose }) => {
             </svg>
           </div>
           <div>
-            <h3 className="font-bold text-lg">AgriBot</h3>
+            <h3 className="font-bold text-lg">CRS Talk</h3>
             <p className="text-xs text-green-100">Your Farming Assistant</p>
           </div>
         </div>

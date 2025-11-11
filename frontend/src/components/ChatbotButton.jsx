@@ -16,7 +16,7 @@ const ChatbotButton = ({ onClick, isOpen }) => {
       {/* Tooltip */}
       {isHovered && (
         <div className="absolute bottom-full right-0 mb-3 bg-gray-800 text-white text-sm px-4 py-2 rounded-lg shadow-lg whitespace-nowrap pointer-events-none">
-          💬 Chat with AgriBot
+          💬 Chat with CRS Talk
           <div className="absolute bottom-0 right-6 transform translate-y-1/2 rotate-45 w-2 h-2 bg-gray-800"></div>
         </div>
       )}
